@@ -19,8 +19,11 @@ public class MyServlet extends HttpServlet {
 
 //        req.getInputStream();
 //        req.getReader();
+        String name = req.getParameter("name");
+        String dateFrom = req.getParameter("dateFrom");
+        String description = req.getParameter("descr");
 
-        super.doPost(req, resp);
+        resp.getWriter().println(req.getParameter("name")+", "+req.getParameter("dateFrom")+", "+req.getParameter("descr"));
     }
 
     @Override

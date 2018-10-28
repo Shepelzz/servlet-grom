@@ -1,5 +1,7 @@
 package dao;
 
+import exception.BadRequestException;
+import exception.InternalServerError;
 import model.Item;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -12,7 +14,7 @@ import javax.persistence.NoResultException;
 public class ItemDAO {
     private SessionFactory sessionFactory;
 
-    public Item save(Item item) throws Exception{
+    public Item save(Item item) throws InternalServerError {
         Transaction transaction = null;
         try (Session session = createSessionFactory().openSession()) {
             transaction = session.getTransaction();
@@ -26,11 +28,11 @@ public class ItemDAO {
         } catch (HibernateException e) {
             if (transaction != null)
                 transaction.rollback();
-            throw new Exception("Save "+item.getClass().getSimpleName()+": "+item.toString()+" failed"+e.getMessage());
+            throw new InternalServerError("Save "+item.getClass().getSimpleName()+": "+item.toString()+" failed"+e.getMessage());
         }
     }
 
-    public Item update(Item item) throws Exception{
+    public Item update(Item item) throws InternalServerError{
         Transaction transaction = null;
         try (Session session = createSessionFactory().openSession()) {
             transaction = session.getTransaction();
@@ -44,11 +46,11 @@ public class ItemDAO {
         } catch (HibernateException e) {
             if (transaction != null)
                 transaction.rollback();
-            throw new Exception("Update "+item.getClass().getSimpleName()+": "+item.toString()+" failed"+e.getMessage());
+            throw new InternalServerError("Update "+item.getClass().getSimpleName()+": "+item.toString()+" failed"+e.getMessage());
         }
     }
 
-    public Item delete(Long id) throws Exception{
+    public Item delete(Long id) throws InternalServerError{
         Item item = findById(id);
 
         Transaction transaction = null;
@@ -64,19 +66,19 @@ public class ItemDAO {
         } catch (HibernateException e) {
             if (transaction != null)
                 transaction.rollback();
-            throw new Exception("Delete "+item.getClass().getSimpleName()+": "+item.toString()+" failed"+e.getMessage());
+            throw new InternalServerError("Delete "+item.getClass().getSimpleName()+": "+item.toString()+" failed"+e.getMessage());
         }
     }
 
-    public Item findById(Long id) throws Exception{
+    public Item findById(Long id) throws InternalServerError{
         try (Session session = createSessionFactory().openSession()) {
 
             return session.get(Item.class, id);
 
         } catch (HibernateException e) {
-            throw new Exception(getClass().getSimpleName()+"-findById: "+id+" failed. "+e.getMessage());
+            throw new InternalServerError(getClass().getSimpleName()+"-findById: "+id+" failed. "+e.getMessage());
         } catch (NoResultException noe){
-            throw new Exception("There is not Item with id: "+id+". "+noe.getMessage());
+            throw new BadRequestException("There is not Item with id: "+id+". "+noe.getMessage());
         }
     }
 

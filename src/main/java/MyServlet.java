@@ -1,6 +1,5 @@
+import com.fasterxml.jackson.databind.ObjectMapper;
 import controller.ItemController;
-import exception.BadRequestException;
-import exception.InternalServerError;
 import model.Item;
 
 import javax.servlet.ServletException;
@@ -9,9 +8,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 @WebServlet(urlPatterns = "/test")
 public class MyServlet extends HttpServlet {
@@ -20,7 +16,7 @@ public class MyServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
-            resp.getWriter().println(itemController.findById(Long.valueOf(req.getParameter("itemId"))).toString());
+            resp.getWriter().println(itemController.findById(Long.valueOf(req.getParameter("id"))).toString());
         }catch (Exception e){
             resp.getWriter().println(e.getMessage());
         }
@@ -28,40 +24,17 @@ public class MyServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-
-//        req.getInputStream();
-//        req.getReader();
-
-        Item item = new Item();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.mm.yyyy");
-
         try {
-            item.setName(req.getParameter("name"));
-            item.setDateCreated(dateFormat.parse(req.getParameter("dateCreated")));
-            item.setLastUpdatedDate(dateFormat.parse(req.getParameter("lastUpdatedDate")));
-            item.setDescription(req.getParameter("description"));
-
-            resp.getWriter().println("item was saved with id: "+itemController.save(item).getId());
-
+            resp.getWriter().println("item was saved with id: "+itemController.save(new ObjectMapper().readValue(req.getInputStream(), Item.class)).getId());
         } catch (Exception e){
             resp.getWriter().println(e.getMessage());
         }
     }
 
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Item item = new Item();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.mm.yyyy");
-
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
-            item.setId(Long.valueOf(req.getParameter("id")));
-            item.setName(req.getParameter("name"));
-            item.setDateCreated(dateFormat.parse(req.getParameter("dateCreated")));
-            item.setLastUpdatedDate(dateFormat.parse(req.getParameter("lastUpdatedDate")));
-            item.setDescription(req.getParameter("description"));
-
-            resp.getWriter().println("Item with id: "+itemController.update(item).getId()+" was updated.");
-
+            resp.getWriter().println("Item with id: "+itemController.update(new ObjectMapper().readValue(req.getInputStream(), Item.class)).getId()+" was updated.");
         } catch (Exception e){
             resp.getWriter().println(e.getMessage());
         }
@@ -70,7 +43,7 @@ public class MyServlet extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
-            resp.getWriter().println("Item with id: "+itemController.delete(Long.valueOf(req.getParameter("itemId"))).getId()+" was deleted.");
+            resp.getWriter().println("Item with id: "+itemController.delete(Long.valueOf(req.getParameter("id"))).getId()+" was deleted.");
         }catch (Exception e){
             resp.getWriter().println(e.getMessage());
         }
@@ -85,9 +58,4 @@ public class MyServlet extends HttpServlet {
     //  POST - save some info
     //  PUT - update
     //  DELETE - delete info
-
-
-
-
-
 }

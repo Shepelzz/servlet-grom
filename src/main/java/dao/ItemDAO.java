@@ -10,9 +10,12 @@ import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 
 import javax.persistence.NoResultException;
+import java.util.Date;
 
 public class ItemDAO {
     private SessionFactory sessionFactory;
+
+    private static final String SQL_FIND_ITEM_BY_NAME = "SELECT * FROM ITEM WHERE NAME = :name";
 
     public Item save(Item item) throws InternalServerError {
         Transaction transaction = null;
@@ -20,6 +23,8 @@ public class ItemDAO {
             transaction = session.getTransaction();
             transaction.begin();
 
+            item.setDateCreated(new Date());
+            item.setLastUpdatedDate(new Date());
             session.save(item);
 
             session.getTransaction().commit();
@@ -38,6 +43,7 @@ public class ItemDAO {
             transaction = session.getTransaction();
             transaction.begin();
 
+            item.setLastUpdatedDate(new Date());
             session.update(item);
 
             session.getTransaction().commit();
@@ -50,9 +56,7 @@ public class ItemDAO {
         }
     }
 
-    public Item delete(Long id) throws InternalServerError{
-        Item item = findById(id);
-
+    public Item delete(Item item) throws InternalServerError{
         Transaction transaction = null;
         try (Session session = createSessionFactory().openSession()) {
             transaction = session.getTransaction();
@@ -79,6 +83,20 @@ public class ItemDAO {
             throw new InternalServerError(getClass().getSimpleName()+"-findById: "+id+" failed. "+e.getMessage());
         } catch (NoResultException noe){
             throw new BadRequestException("There is not Item with id: "+id+". "+noe.getMessage());
+        }
+    }
+
+    public Item findByName(String name) throws InternalServerError{
+        try (Session session = createSessionFactory().openSession()) {
+
+            return (Item) session.createSQLQuery(SQL_FIND_ITEM_BY_NAME)
+                    .setParameter("name", name)
+                    .addEntity(Item.class).getSingleResult();
+
+        } catch (HibernateException e) {
+            throw new InternalServerError(getClass().getSimpleName()+"-findByName: "+name+" failed. "+e.getMessage());
+        } catch (NoResultException e){
+            return null;
         }
     }
 

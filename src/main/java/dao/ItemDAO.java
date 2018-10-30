@@ -74,7 +74,7 @@ public class ItemDAO {
         }
     }
 
-    public Item findById(Long id) throws InternalServerError{
+    public Item findById(Long id) throws InternalServerError, BadRequestException{
         try (Session session = createSessionFactory().openSession()) {
 
             return session.get(Item.class, id);
